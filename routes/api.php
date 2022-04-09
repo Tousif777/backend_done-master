@@ -2,42 +2,56 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
+use App\Http\Controllers\CourseController;
+use App\Http\Controllers\StudentController;
+use App\Http\Controllers\StudentCourseController;
+use App\Http\Controllers\VideoController;
 
-Route::post('register', [\App\Http\Controllers\AuthController::class, 'register']);
-Route::post('login', [\App\Http\Controllers\AuthController::class, 'login']);
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('user', [\App\Http\Controllers\AuthController::class, 'user']);
-    Route::post('logout', [\App\Http\Controllers\AuthController::class, 'logout']);
-    Route::get('students', [\App\Http\Controllers\StudentController::class, 'index']);
-    Route::post('students', [\App\Http\Controllers\StudentController::class, 'store']);
-    Route::get('students/{id}', [\App\Http\Controllers\StudentController::class, 'show']);
-    Route::put('students/{id}', [\App\Http\Controllers\StudentController::class, 'update']);
-    Route::delete('students/{id}', [\App\Http\Controllers\StudentController::class, 'destroy']);
-    Route::get('courses', [\App\Http\Controllers\CourseController::class, 'index']);
-    Route::post('courses', [\App\Http\Controllers\CourseController::class, 'store']);
-    Route::get('courses/{id}', [\App\Http\Controllers\CourseController::class, 'show']);
-    Route::put('courses/{id}', [\App\Http\Controllers\CourseController::class, 'update']);
-    Route::delete('courses/{id}', [\App\Http\Controllers\CourseController::class, 'destroy']);
-    Route::get('student_courses', [\App\Http\Controllers\StudentCourseController::class, 'index']);
-    Route::post('student_courses', [\App\Http\Controllers\StudentCourseController::class, 'store']);
-    Route::get('student_courses/{id}', [\App\Http\Controllers\StudentCourseController::class, 'show']);
-    Route::put('student_courses/{id}', [\App\Http\Controllers\StudentCourseController::class, 'update']);
-    Route::delete('student_courses/{id}', [\App\Http\Controllers\StudentCourseController::class, 'destroy']);
-    Route::get('videos', [\App\Http\Controllers\VideoController::class, 'index']);
-    Route::post('videos', [\App\Http\Controllers\VideoController::class, 'store']);
-    Route::get('videos/{id}', [\App\Http\Controllers\VideoController::class, 'show']);
-    Route::put('videos/{id}', [\App\Http\Controllers\VideoController::class, 'update']);
-    Route::delete('videos/{id}', [\App\Http\Controllers\VideoController::class, 'destroy']);
+Route::group([
+
+    'middleware' => 'api',
+    'namespace' => 'App\Http\Controllers',
+    'prefix' => 'auth'
+
+], function ($router) {
+    Route::post('register', 'AuthController@register');
+    Route::post('login', 'AuthController@login');
+    Route::post('logout', 'AuthController@logout');
+    Route::post('refresh', 'AuthController@refresh');
+    Route::post('me', 'AuthController@me');
 
 });
+
+Route::group(['middleware' => ['jwt.auth']], function() {
+    Route::get('courses', [CourseController::class, 'index']);
+    Route::get('courses/{id}', [CourseController::class, 'show']);
+    Route::post('courses', [CourseController::class, 'store']);
+    Route::put('courses/{id}', [CourseController::class, 'update']);
+    Route::delete('courses/{id}', [CourseController::class, 'destroy']);
+});
+
+Route::group(['middleware' => ['jwt.auth']], function() {
+    Route::get('students', [StudentController::class, 'index']);
+    Route::get('students/{id}', [StudentController::class, 'show']);
+    Route::post('students', [StudentController::class, 'store']);
+    Route::put('students/{id}', [StudentController::class, 'update']);
+    Route::delete('students/{id}', [StudentController::class, 'destroy']);
+});
+
+Route::group(['middleware' => ['jwt.auth']], function() {
+    Route::get('student_courses', [StudentCourseController::class, 'index']);
+    Route::get('student_courses/{id}', [StudentCourseController::class, 'show']);
+    Route::post('student_courses', [StudentCourseController::class, 'store']);
+    Route::put('student_courses/{id}', [StudentCourseController::class, 'update']);
+    Route::delete('student_courses/{id}', [StudentCourseController::class, 'destroy']);
+});
+
+Route::group(['middleware' => ['jwt.auth']], function() {
+    Route::get('videos', [VideoController::class, 'index']);
+    Route::get('videos/{id}', [VideoController::class, 'show']);
+    Route::post('videos', [VideoController::class, 'store']);
+    Route::put('videos/{id}', [VideoController::class, 'update']);
+    Route::delete('videos/{id}', [VideoController::class, 'destroy']);
+});
+
